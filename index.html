@@ -738,6 +738,63 @@
   }
 
   .quota-display strong { color: var(--warning); }
+
+  /* ---- Multi-Select Tag Picker ---- */
+  .multi-select { position: relative; }
+  .ms-trigger {
+    display: flex; align-items: center; justify-content: space-between;
+    border: 1px solid var(--border-solid); border-radius: var(--radius-sm);
+    background: var(--card); padding: 5px 8px; cursor: pointer;
+    min-height: 32px; font-size: 12px; color: var(--text-muted);
+    transition: border-color .15s;
+  }
+  .ms-trigger:hover { border-color: var(--primary); }
+  .ms-trigger.open { border-color: var(--primary); border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
+  .ms-trigger .ms-placeholder { color: var(--text-muted); }
+  .ms-trigger .ms-arrow { font-size: 10px; margin-left: 6px; transition: transform .15s; flex-shrink: 0; }
+  .ms-trigger.open .ms-arrow { transform: rotate(180deg); }
+  .ms-count-badge {
+    font-size: 10px; background: var(--primary); color: #fff;
+    border-radius: 10px; padding: 1px 6px; margin-left: 4px; flex-shrink: 0;
+  }
+  .ms-dropdown {
+    display: none; position: absolute; z-index: 9999; left: 0; right: 0;
+    background: var(--card); border: 1px solid var(--primary);
+    border-top: none; border-bottom-left-radius: var(--radius-sm);
+    border-bottom-right-radius: var(--radius-sm);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.12); overflow: hidden;
+  }
+  .ms-dropdown.open { display: block; }
+  .ms-search-wrap { padding: 6px; border-bottom: 1px solid var(--border-solid); }
+  .ms-search {
+    width: 100%; box-sizing: border-box; border: 1px solid var(--border-solid);
+    border-radius: var(--radius-sm); padding: 4px 8px; font-size: 12px;
+    color: var(--text); background: var(--card2); outline: none;
+  }
+  .ms-search:focus { border-color: var(--primary); }
+  .ms-options { max-height: 180px; overflow-y: auto; }
+  .ms-option {
+    display: flex; align-items: center; gap: 7px;
+    padding: 5px 8px; cursor: pointer; font-size: 12px; color: var(--text);
+    transition: background .1s;
+  }
+  .ms-option:hover { background: rgba(67,97,238,0.06); }
+  .ms-option.selected { background: rgba(67,97,238,0.08); color: var(--primary); font-weight: 500; }
+  .ms-option input[type=checkbox] { accent-color: var(--primary); width: 13px; height: 13px; flex-shrink: 0; }
+  .ms-empty { padding: 10px 8px; font-size: 12px; color: var(--text-muted); text-align: center; }
+  .ms-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 5px; }
+  .ms-tag {
+    display: flex; align-items: center; gap: 3px;
+    background: rgba(67,97,238,0.08); border: 1px solid rgba(67,97,238,0.2);
+    color: var(--primary); border-radius: 10px; padding: 2px 7px 2px 8px;
+    font-size: 11px; font-weight: 500; max-width: 160px;
+  }
+  .ms-tag span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .ms-tag-remove {
+    cursor: pointer; font-size: 13px; line-height: 1; color: var(--primary);
+    opacity: .7; flex-shrink: 0;
+  }
+  .ms-tag-remove:hover { opacity: 1; }
 </style>
 </head>
 <body>
@@ -858,15 +915,15 @@
           <div class="card-body">
             <div class="filter-group">
               <label class="filter-label">Société</label>
-              <input type="text" class="input" id="f-societe" placeholder="Rechercher société...">
+              <div id="ms-societe" class="multi-select"></div>
             </div>
             <div class="filter-group">
               <label class="filter-label">Fonction</label>
-              <input type="text" class="input" id="f-fonction" placeholder="Ex: Directeur, DRH...">
+              <div id="ms-fonction" class="multi-select"></div>
             </div>
             <div class="filter-group">
               <label class="filter-label">Ville</label>
-              <input type="text" class="input" id="f-ville" placeholder="Rechercher ville...">
+              <div id="ms-ville" class="multi-select"></div>
             </div>
             <div class="filter-group">
               <label class="filter-label">Secteur</label>
@@ -1355,6 +1412,177 @@ async function loadContacts() {
   }
 }
 
+// ============================================================
+// MULTI-SELECT TAG PICKER
+// ============================================================
+const _msState = {}; // { containerId: { selected: Set, allOptions: [] } }
+
+function createMultiSelect(containerId, options, placeholder, noun) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  _msState[containerId] = { selected: new Set(), allOptions: options, noun };
+
+  container.innerHTML = `
+    <div class="ms-trigger" id="${containerId}-trigger">
+      <span class="ms-placeholder" id="${containerId}-label">${placeholder}</span>
+      <span class="ms-arrow">▼</span>
+    </div>
+    <div class="ms-dropdown" id="${containerId}-dropdown">
+      <div class="ms-search-wrap">
+        <input class="ms-search" id="${containerId}-search" type="text" placeholder="Chercher…" autocomplete="off">
+      </div>
+      <div class="ms-options" id="${containerId}-options"></div>
+    </div>
+    <div class="ms-tags" id="${containerId}-tags"></div>
+  `;
+
+  _msRenderOptions(containerId, '');
+
+  document.getElementById(`${containerId}-trigger`).addEventListener('click', e => {
+    e.stopPropagation();
+    _msToggleDropdown(containerId);
+  });
+
+  document.getElementById(`${containerId}-search`).addEventListener('input', e => {
+    _msRenderOptions(containerId, e.target.value.toLowerCase());
+  });
+
+  document.getElementById(`${containerId}-search`).addEventListener('click', e => e.stopPropagation());
+}
+
+function _msToggleDropdown(containerId) {
+  const trigger = document.getElementById(`${containerId}-trigger`);
+  const dropdown = document.getElementById(`${containerId}-dropdown`);
+  const isOpen = dropdown.classList.contains('open');
+  // Close all open dropdowns first
+  document.querySelectorAll('.ms-dropdown.open').forEach(d => {
+    d.classList.remove('open');
+    const tid = d.id.replace('-dropdown','');
+    const t = document.getElementById(`${tid}-trigger`);
+    if (t) t.classList.remove('open');
+  });
+  if (!isOpen) {
+    dropdown.classList.add('open');
+    trigger.classList.add('open');
+    const search = document.getElementById(`${containerId}-search`);
+    if (search) { search.value = ''; _msRenderOptions(containerId, ''); search.focus(); }
+  }
+}
+
+function _msRenderOptions(containerId, query) {
+  const state = _msState[containerId];
+  if (!state) return;
+  const optContainer = document.getElementById(`${containerId}-options`);
+  if (!optContainer) return;
+
+  const filtered = query ? state.allOptions.filter(o => o.toLowerCase().includes(query)) : state.allOptions;
+  const total = state.allOptions.length;
+  const noun = state.noun || 'options';
+
+  if (filtered.length === 0) {
+    optContainer.innerHTML = `<div class="ms-empty">Aucun résultat</div>`;
+    return;
+  }
+
+  optContainer.innerHTML = filtered.map(opt => {
+    const checked = state.selected.has(opt);
+    const esc = opt.replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    return `<label class="ms-option${checked ? ' selected' : ''}">
+      <input type="checkbox" ${checked ? 'checked' : ''} onchange="_msToggleOption('${containerId}', this.parentElement, '${esc.replace(/'/g,"\\'")}')">
+      <span>${esc}</span>
+    </label>`;
+  }).join('');
+
+  // Update trigger label with count
+  _msUpdateLabel(containerId);
+}
+
+function _msToggleOption(containerId, labelEl, value) {
+  const state = _msState[containerId];
+  if (!state) return;
+  if (state.selected.has(value)) {
+    state.selected.delete(value);
+    labelEl.classList.remove('selected');
+  } else {
+    state.selected.add(value);
+    labelEl.classList.add('selected');
+  }
+  _msUpdateLabel(containerId);
+  _msRenderTags(containerId);
+  applyFilters();
+}
+
+function _msUpdateLabel(containerId) {
+  const state = _msState[containerId];
+  if (!state) return;
+  const labelEl = document.getElementById(`${containerId}-label`);
+  if (!labelEl) return;
+  const sel = state.selected.size;
+  const total = state.allOptions.length;
+  const noun = state.noun || 'options';
+  if (sel === 0) {
+    labelEl.textContent = `Toutes (${total} ${noun})`;
+    labelEl.style.color = 'var(--text-muted)';
+  } else {
+    labelEl.innerHTML = `<span class="ms-count-badge">${sel}</span> / ${total} ${noun}`;
+    labelEl.style.color = 'var(--text)';
+  }
+}
+
+function _msRenderTags(containerId) {
+  const state = _msState[containerId];
+  const tagsEl = document.getElementById(`${containerId}-tags`);
+  if (!tagsEl || !state) return;
+  tagsEl.innerHTML = [...state.selected].map(val => {
+    const esc = val.replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    return `<span class="ms-tag"><span title="${esc}">${esc}</span><span class="ms-tag-remove" onclick="_msRemoveTag('${containerId}', '${val.replace(/'/g,"\\'")}')">×</span></span>`;
+  }).join('');
+}
+
+function _msRemoveTag(containerId, value) {
+  const state = _msState[containerId];
+  if (!state) return;
+  state.selected.delete(value);
+  _msUpdateLabel(containerId);
+  _msRenderTags(containerId);
+  // Also uncheck in options list if visible
+  const optContainer = document.getElementById(`${containerId}-options`);
+  if (optContainer) {
+    optContainer.querySelectorAll('.ms-option').forEach(lbl => {
+      const inp = lbl.querySelector('input');
+      if (inp && lbl.querySelector('span') && lbl.querySelector('span').textContent === value) {
+        inp.checked = false;
+        lbl.classList.remove('selected');
+      }
+    });
+  }
+  applyFilters();
+}
+
+function getMultiSelectValues(containerId) {
+  const state = _msState[containerId];
+  return state ? [...state.selected] : [];
+}
+
+function clearMultiSelect(containerId) {
+  const state = _msState[containerId];
+  if (!state) return;
+  state.selected.clear();
+  _msUpdateLabel(containerId);
+  _msRenderTags(containerId);
+  _msRenderOptions(containerId, '');
+}
+
+// Close dropdowns on outside click
+document.addEventListener('click', () => {
+  document.querySelectorAll('.ms-dropdown.open').forEach(d => {
+    d.classList.remove('open');
+    const tid = d.id.replace('-dropdown','');
+    const t = document.getElementById(`${tid}-trigger`);
+    if (t) t.classList.remove('open');
+  });
+});
+
 function populateFilterOptions() {
   const sectors = [...new Set(allContacts.map(c => c.secteur).filter(Boolean))].sort();
   const effectifs = [...new Set(allContacts.map(c => c.effectif).filter(Boolean))].sort();
@@ -1363,6 +1591,14 @@ function populateFilterOptions() {
   fillSelect('f-secteur', sectors, 'Tous les secteurs');
   fillSelect('f-effectif', effectifs, 'Tous les effectifs');
   fillSelect('f-resultat', resultats, 'Tous les statuts');
+
+  const societes = [...new Set(allContacts.map(c => c.societe).filter(Boolean))].sort();
+  const fonctions = [...new Set(allContacts.map(c => c.fonction).filter(s => s && s.trim()))].map(s => s.trim()).filter((v,i,a) => a.indexOf(v) === i).sort();
+  const villes = [...new Set(allContacts.map(c => c.ville).filter(Boolean))].sort();
+
+  createMultiSelect('ms-societe', societes, 'Rechercher société…', 'sociétés');
+  createMultiSelect('ms-fonction', fonctions, 'Rechercher fonction…', 'fonctions');
+  createMultiSelect('ms-ville', villes, 'Rechercher ville…', 'villes');
 }
 
 function fillSelect(id, values, placeholder) {
@@ -1381,18 +1617,18 @@ function fillSelect(id, values, placeholder) {
 // FILTERS
 // ============================================================
 function applyFilters() {
-  const fSociete = document.getElementById('f-societe').value.trim().toLowerCase();
-  const fFonction = document.getElementById('f-fonction').value.trim().toLowerCase();
-  const fVille = document.getElementById('f-ville').value.trim().toLowerCase();
+  const selSociete = getMultiSelectValues('ms-societe');
+  const selFonction = getMultiSelectValues('ms-fonction');
+  const selVille = getMultiSelectValues('ms-ville');
   const fSecteur = document.getElementById('f-secteur').value;
   const fEffectif = document.getElementById('f-effectif').value;
   const fResultat = document.getElementById('f-resultat').value;
   const emailOnly = document.getElementById('f-email-only').checked;
 
   filteredContacts = allContacts.filter(c => {
-    if (fSociete && !c.societe.toLowerCase().includes(fSociete)) return false;
-    if (fFonction && !c.fonction.toLowerCase().includes(fFonction)) return false;
-    if (fVille && !c.ville.toLowerCase().includes(fVille)) return false;
+    if (selSociete.length && !selSociete.includes(c.societe)) return false;
+    if (selFonction.length && !selFonction.includes((c.fonction || '').trim())) return false;
+    if (selVille.length && !selVille.includes(c.ville)) return false;
     if (fSecteur && c.secteur !== fSecteur) return false;
     if (fEffectif && c.effectif !== fEffectif) return false;
     if (fResultat && c.resultat !== fResultat) return false;
@@ -1406,7 +1642,7 @@ function applyFilters() {
 }
 
 function resetFilters() {
-  ['f-societe','f-fonction','f-ville'].forEach(id => document.getElementById(id).value = '');
+  ['ms-societe','ms-fonction','ms-ville'].forEach(id => clearMultiSelect(id));
   ['f-secteur','f-effectif','f-resultat'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('f-email-only').checked = true;
   applyFilters();
