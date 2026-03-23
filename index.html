@@ -1,0 +1,1803 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TR7 Outreach Hub</title>
+<style>
+  :root {
+    --primary: #6C5CE7;
+    --accent: #00D2D3;
+    --bg: #0D1117;
+    --card: #161B22;
+    --card2: #1C2128;
+    --border: #30363D;
+    --text: #E6EDF3;
+    --text-muted: #8B949E;
+    --success: #3FB950;
+    --error: #F85149;
+    --warning: #D29922;
+    --gradient: linear-gradient(135deg, #6C5CE7, #00D2D3);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 14px;
+  }
+
+  /* === SCROLLBAR === */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--primary); }
+
+  /* === HEADER === */
+  header {
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .logo {
+    font-size: 20px;
+    font-weight: 700;
+    background: var(--gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -0.5px;
+  }
+
+  .logo span { font-size: 12px; -webkit-text-fill-color: var(--text-muted); background: none; font-weight: 400; margin-left: 8px; }
+
+  .header-stats {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+  }
+
+  .stat-chip {
+    background: var(--card2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 12px;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .stat-chip .val {
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  .stat-chip.accent .val { color: var(--accent); }
+  .stat-chip.primary .val { color: var(--primary); }
+  .stat-chip.warning .val { color: var(--warning); }
+  .stat-chip.success .val { color: var(--success); }
+
+  .header-actions { display: flex; gap: 8px; }
+
+  /* === BUTTONS === */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    transition: all 0.15s;
+    text-decoration: none;
+  }
+
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .btn-primary {
+    background: var(--primary);
+    color: #fff;
+  }
+  .btn-primary:hover:not(:disabled) { background: #5a4dd4; }
+
+  .btn-gradient {
+    background: var(--gradient);
+    color: #fff;
+  }
+  .btn-gradient:hover:not(:disabled) { opacity: 0.9; }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+  }
+  .btn-ghost:hover:not(:disabled) { color: var(--text); border-color: var(--text-muted); background: var(--card2); }
+
+  .btn-danger {
+    background: var(--error);
+    color: #fff;
+  }
+  .btn-danger:hover:not(:disabled) { background: #d73a49; }
+
+  .btn-success {
+    background: var(--success);
+    color: #fff;
+  }
+  .btn-success:hover:not(:disabled) { background: #2ea043; }
+
+  .btn-sm { padding: 4px 10px; font-size: 12px; }
+
+  /* === TABS === */
+  .tabs {
+    display: flex;
+    gap: 2px;
+    padding: 16px 24px 0;
+    border-bottom: 1px solid var(--border);
+    background: var(--card);
+  }
+
+  .tab {
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 6px 6px 0 0;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-muted);
+    border: 1px solid transparent;
+    border-bottom: none;
+    background: transparent;
+    transition: all 0.15s;
+  }
+
+  .tab:hover { color: var(--text); background: var(--card2); }
+  .tab.active {
+    color: var(--text);
+    background: var(--bg);
+    border-color: var(--border);
+    border-bottom-color: var(--bg);
+    position: relative;
+    bottom: -1px;
+  }
+
+  /* === MAIN LAYOUT === */
+  .main {
+    padding: 24px;
+    max-width: 1600px;
+    margin: 0 auto;
+  }
+
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* === CAMPAIGN MODE === */
+  .campaign-grid {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 20px;
+  }
+
+  @media (max-width: 1100px) {
+    .campaign-grid { grid-template-columns: 1fr; }
+  }
+
+  /* === CARDS === */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .card-header {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .card-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .card-body { padding: 16px; }
+
+  /* === FILTERS === */
+  .filter-group { margin-bottom: 14px; }
+  .filter-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+    display: block;
+  }
+
+  .input, select.input, textarea.input {
+    width: 100%;
+    background: var(--card2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    padding: 7px 10px;
+    font-size: 13px;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  .input:focus, select.input:focus, textarea.input:focus {
+    border-color: var(--primary);
+  }
+
+  .input::placeholder { color: var(--text-muted); }
+
+  select.input option { background: var(--card2); }
+
+  textarea.input { resize: vertical; min-height: 100px; line-height: 1.5; }
+
+  /* === CONTACT LIST === */
+  .contact-list-header {
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+    background: var(--card2);
+  }
+
+  .contact-list-actions { display: flex; gap: 6px; align-items: center; }
+
+  .contact-count {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  .contact-count strong { color: var(--accent); }
+
+  .contact-table-wrap {
+    overflow-y: auto;
+    max-height: 400px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  thead th {
+    background: var(--card2);
+    padding: 8px 12px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.1s;
+    cursor: pointer;
+  }
+
+  tbody tr:hover { background: rgba(108,92,231,0.07); }
+  tbody tr.selected { background: rgba(108,92,231,0.12); }
+  tbody tr.selected:hover { background: rgba(108,92,231,0.16); }
+
+  tbody td {
+    padding: 9px 12px;
+    vertical-align: middle;
+    max-width: 180px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  tbody td.td-email { color: var(--accent); font-size: 12px; }
+  tbody td.td-ville { color: var(--text-muted); font-size: 12px; }
+  tbody td.td-societe { font-weight: 600; }
+
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 500;
+  }
+
+  .badge-no-email {
+    background: rgba(248,81,73,0.15);
+    color: var(--error);
+  }
+
+  /* === COMPOSE === */
+  .compose-area { margin-top: 16px; }
+
+  .var-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+
+  .var-btn {
+    background: rgba(108,92,231,0.15);
+    border: 1px solid rgba(108,92,231,0.3);
+    color: #a29bfe;
+    border-radius: 4px;
+    padding: 3px 9px;
+    font-size: 12px;
+    cursor: pointer;
+    font-family: 'Courier New', monospace;
+    transition: all 0.15s;
+  }
+
+  .var-btn:hover { background: rgba(108,92,231,0.3); color: #fff; }
+
+  /* === PROGRESS === */
+  .progress-bar {
+    height: 6px;
+    background: var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+    margin: 10px 0;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: var(--gradient);
+    border-radius: 3px;
+    transition: width 0.3s;
+  }
+
+  .send-log {
+    max-height: 150px;
+    overflow-y: auto;
+    background: var(--card2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px;
+    margin-top: 10px;
+    font-size: 12px;
+  }
+
+  .log-entry {
+    padding: 3px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .log-entry .ico { font-size: 11px; }
+  .log-ok { color: var(--success); }
+  .log-err { color: var(--error); }
+
+  /* === TEMPLATES === */
+  .template-row {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  /* === MODAL === */
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .modal-backdrop.hidden { display: none; }
+
+  .modal {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    width: 100%;
+    max-width: 520px;
+    overflow: hidden;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.5);
+  }
+
+  .modal-header {
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .modal-title {
+    font-size: 18px;
+    font-weight: 700;
+    background: var(--gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .modal-subtitle { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+
+  .modal-body { padding: 20px 24px; }
+  .modal-footer {
+    padding: 16px 24px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+  }
+
+  .form-group { margin-bottom: 16px; }
+  .form-label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .form-hint { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+
+  /* === TOAST === */
+  #toast-container {
+    position: fixed;
+    top: 70px;
+    right: 20px;
+    z-index: 2000;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    pointer-events: none;
+  }
+
+  .toast {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    min-width: 220px;
+    max-width: 360px;
+    font-size: 13px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    animation: toastIn 0.2s ease;
+    pointer-events: auto;
+    border-left: 3px solid var(--border);
+  }
+
+  .toast.success { border-left-color: var(--success); }
+  .toast.error { border-left-color: var(--error); }
+  .toast.info { border-left-color: var(--primary); }
+  .toast.warning { border-left-color: var(--warning); }
+
+  @keyframes toastIn {
+    from { transform: translateX(20px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+
+  /* === LOADING === */
+  .loading-spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--border);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    display: inline-block;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .loading-overlay {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    flex-direction: column;
+    gap: 12px;
+    color: var(--text-muted);
+    font-size: 13px;
+  }
+
+  /* === EMPTY STATE === */
+  .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-muted);
+  }
+
+  .empty-state .icon { font-size: 36px; margin-bottom: 12px; }
+  .empty-state p { font-size: 13px; }
+
+  /* === PREVIEW MODAL === */
+  .preview-email {
+    background: #fff;
+    color: #222;
+    border-radius: 8px;
+    padding: 20px;
+    font-size: 14px;
+    line-height: 1.6;
+    max-height: 400px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    font-family: Georgia, serif;
+  }
+
+  /* === DIRECT EMAIL === */
+  .direct-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  @media (max-width: 800px) {
+    .direct-grid { grid-template-columns: 1fr; }
+  }
+
+  /* === COMPOSE SECTION === */
+  .compose-section {
+    margin-top: 20px;
+  }
+
+  .section-divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 20px 0;
+    color: var(--text-muted);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .section-divider::before,
+  .section-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* Quota warning */
+  .quota-bar {
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-top: 4px;
+  }
+
+  .quota-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.3s;
+  }
+
+  /* === CHECKBOX === */
+  input[type="checkbox"] {
+    width: 15px;
+    height: 15px;
+    accent-color: var(--primary);
+    cursor: pointer;
+  }
+
+  /* === SEARCH IN SELECT === */
+  .searchable-wrapper {
+    position: relative;
+  }
+
+  /* === no-email row === */
+  tr.no-email td { opacity: 0.5; }
+
+  /* === selected badge === */
+  .selected-badge {
+    display: inline-flex;
+    align-items: center;
+    background: rgba(108,92,231,0.2);
+    border: 1px solid var(--primary);
+    color: var(--primary);
+    border-radius: 20px;
+    padding: 2px 10px;
+    font-size: 12px;
+    font-weight: 600;
+    min-width: 60px;
+    justify-content: center;
+  }
+
+  /* send button area */
+  .send-area {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 16px;
+  }
+
+  .quota-display {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  .quota-display strong { color: var(--warning); }
+</style>
+</head>
+<body>
+
+<!-- Config Modal -->
+<div class="modal-backdrop" id="configModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">⚡ TR7 Outreach Hub</div>
+      <div class="modal-subtitle">Configuration des accès API — requis au premier lancement</div>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Airtable Personal Access Token</label>
+        <input type="password" class="input" id="cfg-airtable-pat" placeholder="pat..." autocomplete="off">
+        <div class="form-hint">Base ID pré-rempli : appZ3Akvo8m3a7EPD · Table : FT</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Brevo API Key</label>
+        <input type="password" class="input" id="cfg-brevo-key" placeholder="xkeysib-..." autocomplete="off">
+        <div class="form-hint">Endpoint : POST https://api.brevo.com/v3/smtp/email</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Expéditeur (nom affiché)</label>
+        <input type="text" class="input" id="cfg-sender-name" value="TR7 Agency Studio">
+        <div class="form-hint">Email expéditeur fixe : infos@tr7agencystudio.com</div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-gradient" id="cfg-save-btn" onclick="saveConfig()">💾 Enregistrer &amp; Continuer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Preview Modal -->
+<div class="modal-backdrop hidden" id="previewModal">
+  <div class="modal" style="max-width:640px;">
+    <div class="modal-header">
+      <div class="modal-title">👁 Aperçu Email</div>
+      <div class="modal-subtitle">Rendu avec le premier contact sélectionné</div>
+    </div>
+    <div class="modal-body">
+      <div style="margin-bottom:8px; font-size:12px; color:var(--text-muted);">
+        <strong style="color:var(--text)">À :</strong> <span id="preview-to"></span>
+      </div>
+      <div style="margin-bottom:12px; font-size:12px; color:var(--text-muted);">
+        <strong style="color:var(--text)">Objet :</strong> <span id="preview-subject"></span>
+      </div>
+      <div class="preview-email" id="preview-body"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="document.getElementById('previewModal').classList.add('hidden')">Fermer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Template Name Modal -->
+<div class="modal-backdrop hidden" id="templateModal">
+  <div class="modal" style="max-width:380px;">
+    <div class="modal-header">
+      <div class="modal-title">💾 Sauvegarder le template</div>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Nom du template</label>
+        <input type="text" class="input" id="template-name-input" placeholder="Ex: Prospection initiale">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="document.getElementById('templateModal').classList.add('hidden')">Annuler</button>
+      <button class="btn btn-primary" onclick="confirmSaveTemplate()">Sauvegarder</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast container -->
+<div id="toast-container"></div>
+
+<!-- HEADER -->
+<header>
+  <div style="display:flex;align-items:center;gap:16px;">
+    <div class="logo">TR7 Outreach Hub <span>by TR7 Agency Studio</span></div>
+  </div>
+  <div class="header-stats" id="header-stats">
+    <div class="stat-chip accent">📋 <span class="val" id="stat-loaded">0</span> contacts</div>
+    <div class="stat-chip primary">☑️ <span class="val" id="stat-selected">0</span> sélectionnés</div>
+    <div class="stat-chip success">✉️ <span class="val" id="stat-sent">0</span> envoyés</div>
+    <div class="stat-chip warning">⏳ <span class="val" id="stat-remaining">180</span> restants</div>
+  </div>
+  <div class="header-actions">
+    <button class="btn btn-ghost btn-sm" onclick="openConfig()">⚙️ Config</button>
+  </div>
+</header>
+
+<!-- TABS -->
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('campagne')" id="tab-campagne">📣 Campagne</div>
+  <div class="tab" onclick="switchTab('direct')" id="tab-direct">✉️ Email Direct</div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- ====== CAMPAGNE TAB ====== -->
+  <div class="tab-panel active" id="panel-campagne">
+    <div class="campaign-grid">
+
+      <!-- LEFT: Filters -->
+      <div>
+        <div class="card" style="margin-bottom:16px;">
+          <div class="card-header">
+            <div class="card-title">🔍 Filtres</div>
+            <div style="display:flex;gap:6px;">
+              <button class="btn btn-ghost btn-sm" onclick="resetFilters()">Réinitialiser</button>
+              <button class="btn btn-primary btn-sm" onclick="applyFilters()">Appliquer</button>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="filter-group">
+              <label class="filter-label">Société</label>
+              <input type="text" class="input" id="f-societe" placeholder="Rechercher société...">
+            </div>
+            <div class="filter-group">
+              <label class="filter-label">Fonction</label>
+              <input type="text" class="input" id="f-fonction" placeholder="Ex: Directeur, DRH...">
+            </div>
+            <div class="filter-group">
+              <label class="filter-label">Ville</label>
+              <input type="text" class="input" id="f-ville" placeholder="Rechercher ville...">
+            </div>
+            <div class="filter-group">
+              <label class="filter-label">Secteur</label>
+              <select class="input" id="f-secteur">
+                <option value="">Tous les secteurs</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label class="filter-label">Effectif</label>
+              <select class="input" id="f-effectif">
+                <option value="">Tous les effectifs</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label class="filter-label">Résultat prospection</label>
+              <select class="input" id="f-resultat">
+                <option value="">Tous les statuts</option>
+              </select>
+            </div>
+            <div class="filter-group" style="margin-bottom:0;">
+              <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;color:var(--text-muted);">
+                <input type="checkbox" id="f-email-only" checked>
+                <span>Uniquement avec email valide</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Airtable Load -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">☁️ Airtable</div>
+          </div>
+          <div class="card-body">
+            <button class="btn btn-gradient" style="width:100%;" id="load-btn" onclick="loadContacts()">
+              🔄 Charger les contacts
+            </button>
+            <div id="load-progress" style="display:none;margin-top:10px;">
+              <div style="font-size:12px;color:var(--text-muted);margin-bottom:6px;" id="load-status">Chargement...</div>
+              <div class="progress-bar"><div class="progress-fill" id="load-progress-fill" style="width:0%"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Contacts + Compose -->
+      <div>
+        <!-- Contact list -->
+        <div class="card" style="margin-bottom:16px;">
+          <div class="card-header">
+            <div class="card-title">👥 Contacts</div>
+            <div class="contact-list-actions">
+              <span class="contact-count">Affichés : <strong id="filtered-count">0</strong> · Sélectionnés : <span class="selected-badge" id="selected-badge">0</span></span>
+            </div>
+          </div>
+          <div class="contact-list-header">
+            <div style="display:flex;gap:8px;align-items:center;">
+              <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;">
+                <input type="checkbox" id="select-all" onchange="toggleSelectAll(this.checked)">
+                Tout sélectionner
+              </label>
+              <button class="btn btn-ghost btn-sm" onclick="deselectAll()">Désélectionner tout</button>
+            </div>
+            <div id="selection-info" style="font-size:12px;color:var(--text-muted);"></div>
+          </div>
+          <div class="contact-table-wrap" id="contact-table-wrap">
+            <div class="empty-state">
+              <div class="icon">📋</div>
+              <p>Chargez les contacts depuis Airtable pour commencer</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Compose -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">✍️ Composer l'email</div>
+            <div style="display:flex;gap:6px;">
+              <button class="btn btn-ghost btn-sm" onclick="openTemplateModal()">💾 Sauvegarder</button>
+              <select class="input" style="width:auto;padding:4px 8px;font-size:12px;" id="template-select" onchange="loadTemplate(this.value)">
+                <option value="">📂 Charger un template</option>
+              </select>
+            </div>
+          </div>
+          <div class="card-body">
+            <div style="margin-bottom:12px;">
+              <label class="filter-label">Variables disponibles</label>
+              <div class="var-buttons" id="var-buttons-campagne">
+                <button class="var-btn" onclick="insertVar('campagne-body','{civilite}')">{civilite}</button>
+                <button class="var-btn" onclick="insertVar('campagne-body','{prenom}')">{prenom}</button>
+                <button class="var-btn" onclick="insertVar('campagne-body','{nom}')">{nom}</button>
+                <button class="var-btn" onclick="insertVar('campagne-body','{societe}')">{societe}</button>
+                <button class="var-btn" onclick="insertVar('campagne-body','{fonction}')">{fonction}</button>
+                <button class="var-btn" onclick="insertVar('campagne-body','{lien_iclosed}')">{lien_iclosed}</button>
+              </div>
+            </div>
+            <div style="margin-bottom:12px;">
+              <label class="filter-label">Objet</label>
+              <input type="text" class="input" id="campagne-subject" placeholder="Objet de votre email...">
+            </div>
+            <div style="margin-bottom:12px;">
+              <label class="filter-label">Corps de l'email</label>
+              <textarea class="input" id="campagne-body" rows="8" placeholder="Bonjour {civilite} {nom},&#10;&#10;..."></textarea>
+            </div>
+
+            <div class="send-area">
+              <button class="btn btn-ghost" onclick="previewEmail()">👁 Aperçu</button>
+              <button class="btn btn-gradient" id="send-btn" onclick="sendCampaign()">
+                🚀 Envoyer aux sélectionnés
+              </button>
+              <div class="quota-display">
+                Quota : <strong id="quota-display">0/180</strong>
+              </div>
+            </div>
+
+            <div id="send-progress-wrap" style="display:none;margin-top:16px;">
+              <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text-muted);margin-bottom:4px;">
+                <span id="send-status-text">Envoi en cours...</span>
+                <span id="send-pct">0%</span>
+              </div>
+              <div class="progress-bar"><div class="progress-fill" id="send-progress-fill" style="width:0%"></div></div>
+              <div class="send-log" id="send-log"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== EMAIL DIRECT TAB ====== -->
+  <div class="tab-panel" id="panel-direct">
+    <div class="direct-grid">
+
+      <!-- LEFT: Compose -->
+      <div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">✉️ Email Direct</div>
+            <div style="font-size:12px;color:var(--text-muted);">Envoi libre, sans Airtable</div>
+          </div>
+          <div class="card-body">
+            <div style="margin-bottom:12px;">
+              <label class="filter-label">Destinataire(s)</label>
+              <textarea class="input" id="direct-to" rows="2" placeholder="email1@ex.com, email2@ex.com" style="min-height:60px;"></textarea>
+              <div class="form-hint">Séparez plusieurs adresses par des virgules</div>
+            </div>
+            <div style="margin-bottom:12px;">
+              <label class="filter-label">Variables manuelles (optionnel)</label>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+                <input type="text" class="input" id="d-civilite" placeholder="{civilite} → Mr/Mme">
+                <input type="text" class="input" id="d-prenom" placeholder="{prenom}">
+                <input type="text" class="input" id="d-nom" placeholder="{nom}">
+                <input type="text" class="input" id="d-societe" placeholder="{societe}">
+                <input type="text" class="input" id="d-fonction" placeholder="{fonction}" style="grid-column:1/-1;">
+              </div>
+            </div>
+            <div style="margin-bottom:12px;">
+              <label class="filter-label">Variables disponibles</label>
+              <div class="var-buttons">
+                <button class="var-btn" onclick="insertVar('direct-body','{civilite}')">{civilite}</button>
+                <button class="var-btn" onclick="insertVar('direct-body','{prenom}')">{prenom}</button>
+                <button class="var-btn" onclick="insertVar('direct-body','{nom}')">{nom}</button>
+                <button class="var-btn" onclick="insertVar('direct-body','{societe}')">{societe}</button>
+                <button class="var-btn" onclick="insertVar('direct-body','{fonction}')">{fonction}</button>
+                <button class="var-btn" onclick="insertVar('direct-body','{lien_iclosed}')">{lien_iclosed}</button>
+              </div>
+            </div>
+            <div style="margin-bottom:12px;">
+              <label class="filter-label">Objet</label>
+              <input type="text" class="input" id="direct-subject" placeholder="Objet de votre email...">
+            </div>
+            <div style="margin-bottom:16px;">
+              <label class="filter-label">Corps de l'email</label>
+              <textarea class="input" id="direct-body" rows="10" placeholder="Bonjour {civilite} {nom},&#10;&#10;..."></textarea>
+            </div>
+            <div class="send-area">
+              <button class="btn btn-ghost" onclick="previewDirectEmail()">👁 Aperçu</button>
+              <button class="btn btn-gradient" onclick="sendDirectEmail()">🚀 Envoyer</button>
+              <div class="quota-display">Quota : <strong id="quota-display-direct">0/180</strong></div>
+            </div>
+            <div id="direct-send-progress" style="display:none;margin-top:16px;">
+              <div class="progress-bar"><div class="progress-fill" id="direct-progress-fill" style="width:0%"></div></div>
+              <div class="send-log" id="direct-send-log"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Info -->
+      <div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">ℹ️ Aide &amp; Variables</div>
+          </div>
+          <div class="card-body">
+            <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px;">En mode Email Direct, remplissez les champs "Variables manuelles" pour personnaliser l'email avec les balises de remplacement.</p>
+            <div style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:14px;">
+              <div style="font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;">Variables</div>
+              <div style="display:flex;flex-direction:column;gap:6px;font-size:13px;">
+                <div style="display:flex;justify-content:space-between;"><code style="color:#a29bfe;">{civilite}</code><span style="color:var(--text-muted)">Mr / Mme</span></div>
+                <div style="display:flex;justify-content:space-between;"><code style="color:#a29bfe;">{prenom}</code><span style="color:var(--text-muted)">Prénom</span></div>
+                <div style="display:flex;justify-content:space-between;"><code style="color:#a29bfe;">{nom}</code><span style="color:var(--text-muted)">Nom de famille</span></div>
+                <div style="display:flex;justify-content:space-between;"><code style="color:#a29bfe;">{societe}</code><span style="color:var(--text-muted)">Nom de l'entreprise</span></div>
+                <div style="display:flex;justify-content:space-between;"><code style="color:#a29bfe;">{fonction}</code><span style="color:var(--text-muted)">Fonction / Poste</span></div>
+                <div style="display:flex;justify-content:space-between;"><code style="color:#a29bfe;">{lien_iclosed}</code><span style="color:var(--text-muted)">Lien iClosed</span></div>
+              </div>
+              <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border);">
+                <div style="font-size:11px;color:var(--text-muted);">Lien iClosed :</div>
+                <div style="font-size:11px;color:var(--accent);word-break:break-all;">https://app.iclosed.io/e/TR7AgencyStudio/tr7-agency-studio</div>
+              </div>
+            </div>
+            <div style="margin-top:16px;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:14px;">
+              <div style="font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;">Quota journalier Brevo</div>
+              <div style="font-size:24px;font-weight:700;color:var(--text);" id="direct-quota-big">0 / 180</div>
+              <div class="quota-bar" style="margin-top:8px;">
+                <div class="quota-fill" id="direct-quota-fill" style="width:0%;background:var(--success);"></div>
+              </div>
+              <div style="font-size:11px;color:var(--text-muted);margin-top:6px;">Se réinitialise chaque jour à minuit</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<script>
+// ============================================================
+// CONSTANTS
+// ============================================================
+const AIRTABLE_BASE_ID = 'appZ3Akvo8m3a7EPD';
+const AIRTABLE_TABLE_ID = 'tblgi8un8VnSiYWiK';
+const BREVO_ENDPOINT = 'https://api.brevo.com/v3/smtp/email';
+const SENDER_EMAIL = 'infos@tr7agencystudio.com';
+const ICLOSED_LINK = 'https://app.iclosed.io/e/TR7AgencyStudio/tr7-agency-studio';
+const DAILY_LIMIT = 180;
+
+// ============================================================
+// STATE
+// ============================================================
+let allContacts = [];
+let filteredContacts = [];
+let selectedIds = new Set();
+let config = {};
+
+// ============================================================
+// INIT
+// ============================================================
+function init() {
+  loadConfigFromStorage();
+  loadQuotaFromStorage();
+  updateStats();
+  loadTemplateList();
+
+  if (!config.airtablePAT || !config.brevoKey) {
+    document.getElementById('configModal').classList.remove('hidden');
+    prefillConfig();
+  } else {
+    document.getElementById('configModal').classList.add('hidden');
+  }
+}
+
+function prefillConfig() {
+  if (config.airtablePAT) document.getElementById('cfg-airtable-pat').value = config.airtablePAT;
+  if (config.brevoKey) document.getElementById('cfg-brevo-key').value = config.brevoKey;
+  if (config.senderName) document.getElementById('cfg-sender-name').value = config.senderName;
+}
+
+function openConfig() {
+  prefillConfig();
+  document.getElementById('configModal').classList.remove('hidden');
+}
+
+function saveConfig() {
+  const pat = document.getElementById('cfg-airtable-pat').value.trim();
+  const brevo = document.getElementById('cfg-brevo-key').value.trim();
+  const name = document.getElementById('cfg-sender-name').value.trim();
+
+  if (!pat) { toast('Entrez un Airtable PAT', 'error'); return; }
+  if (!brevo) { toast('Entrez une Brevo API key', 'error'); return; }
+
+  config = { airtablePAT: pat, brevoKey: brevo, senderName: name || 'TR7 Agency Studio' };
+  localStorage.setItem('tr7_config', JSON.stringify(config));
+  document.getElementById('configModal').classList.add('hidden');
+  toast('Configuration sauvegardée ✅', 'success');
+}
+
+function loadConfigFromStorage() {
+  try {
+    const raw = localStorage.getItem('tr7_config');
+    if (raw) config = JSON.parse(raw);
+  } catch(e) { config = {}; }
+}
+
+// ============================================================
+// QUOTA
+// ============================================================
+let sentToday = 0;
+
+function loadQuotaFromStorage() {
+  const today = new Date().toISOString().slice(0, 10);
+  try {
+    const raw = localStorage.getItem('tr7_quota');
+    if (raw) {
+      const q = JSON.parse(raw);
+      if (q.date === today) {
+        sentToday = q.count || 0;
+      } else {
+        sentToday = 0;
+        saveQuota();
+      }
+    }
+  } catch(e) { sentToday = 0; }
+  updateQuotaDisplay();
+}
+
+function saveQuota() {
+  const today = new Date().toISOString().slice(0, 10);
+  localStorage.setItem('tr7_quota', JSON.stringify({ date: today, count: sentToday }));
+}
+
+function incrementQuota(n = 1) {
+  sentToday += n;
+  saveQuota();
+  updateQuotaDisplay();
+  updateStats();
+}
+
+function updateQuotaDisplay() {
+  const rem = Math.max(0, DAILY_LIMIT - sentToday);
+  document.getElementById('quota-display').textContent = `${sentToday}/${DAILY_LIMIT}`;
+  document.getElementById('quota-display-direct').textContent = `${sentToday}/${DAILY_LIMIT}`;
+  document.getElementById('direct-quota-big').textContent = `${sentToday} / ${DAILY_LIMIT}`;
+
+  const pct = Math.min(100, (sentToday / DAILY_LIMIT) * 100);
+  const fill = document.getElementById('direct-quota-fill');
+  if (fill) {
+    fill.style.width = pct + '%';
+    fill.style.background = pct > 80 ? 'var(--error)' : pct > 50 ? 'var(--warning)' : 'var(--success)';
+  }
+  document.getElementById('stat-remaining').textContent = rem;
+  document.getElementById('stat-sent').textContent = sentToday;
+}
+
+// ============================================================
+// TABS
+// ============================================================
+function switchTab(tab) {
+  ['campagne', 'direct'].forEach(t => {
+    document.getElementById('tab-' + t).classList.toggle('active', t === tab);
+    document.getElementById('panel-' + t).classList.toggle('active', t === tab);
+  });
+  updateQuotaDisplay();
+}
+
+// ============================================================
+// STATS
+// ============================================================
+function updateStats() {
+  document.getElementById('stat-loaded').textContent = allContacts.length;
+  document.getElementById('stat-selected').textContent = selectedIds.size;
+  updateQuotaDisplay();
+}
+
+// ============================================================
+// EMAIL PARSER
+// ============================================================
+function parseEmail(raw) {
+  if (!raw) return '';
+  // strip newlines
+  let s = raw.replace(/[\r\n]/g, ' ').trim();
+  // markdown link: [text](mailto:email) or [email](mailto:email)
+  const mdMatch = s.match(/\[.*?\]\(mailto:([^\)]+)\)/);
+  if (mdMatch) return mdMatch[1].trim().toLowerCase();
+  // markdown link without mailto: [text](email)
+  const mdMatch2 = s.match(/\[.*?\]\(([^\)]+)\)/);
+  if (mdMatch2) {
+    const candidate = mdMatch2[1].trim();
+    if (candidate.includes('@')) return candidate.toLowerCase();
+  }
+  // plain email
+  const emailMatch = s.match(/[\w.+\-]+@[\w\-]+\.[a-zA-Z]{2,}/);
+  if (emailMatch) return emailMatch[0].trim().toLowerCase();
+  return '';
+}
+
+function cleanField(v) {
+  if (!v) return '';
+  return String(v).replace(/[\r\n]+/g, ' ').trim();
+}
+
+// ============================================================
+// AIRTABLE LOADER
+// ============================================================
+async function loadContacts() {
+  if (!config.airtablePAT) {
+    toast('Configurez votre Airtable PAT d\'abord', 'error');
+    openConfig();
+    return;
+  }
+
+  const btn = document.getElementById('load-btn');
+  btn.disabled = true;
+  btn.textContent = '⏳ Chargement...';
+
+  document.getElementById('load-progress').style.display = 'block';
+
+  allContacts = [];
+  selectedIds.clear();
+
+  let offset = null;
+  let page = 0;
+  let total = 0;
+
+  const wrap = document.getElementById('contact-table-wrap');
+  wrap.innerHTML = `<div class="loading-overlay"><div class="loading-spinner"></div><span>Chargement depuis Airtable...</span></div>`;
+
+  try {
+    do {
+      page++;
+      let url = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${AIRTABLE_TABLE_ID}?pageSize=100`;
+      if (offset) url += `&offset=${encodeURIComponent(offset)}`;
+
+      document.getElementById('load-status').textContent = `Page ${page} — ${allContacts.length} contacts chargés...`;
+      document.getElementById('load-progress-fill').style.width = `${Math.min(90, page * 10)}%`;
+
+      const resp = await fetch(url, {
+        headers: { 'Authorization': `Bearer ${config.airtablePAT}` }
+      });
+
+      if (!resp.ok) {
+        const err = await resp.json();
+        throw new Error(err.error?.message || `HTTP ${resp.status}`);
+      }
+
+      const data = await resp.json();
+      const records = data.records || [];
+
+      for (const rec of records) {
+        const f = rec.fields;
+        const email = parseEmail(f['EMAIL']);
+        allContacts.push({
+          id: rec.id,
+          societe: cleanField(f['SOCIETE']) || '',
+          civilite: cleanField(f['CIVILITE']) || '',
+          prenom: cleanField(f['PRENOM']) || '',
+          nom: cleanField(f['NOM']) || '',
+          fonction: cleanField(f['FONCTION']) || '',
+          email: email,
+          standard: cleanField(f['STANDARD']) || '',
+          ligne_directe: cleanField(f['LIGNE_DIRECTE']) || '',
+          mobile: cleanField(f['MOBILE']) || '',
+          ville: cleanField(f['VILLE']) || '',
+          pays: cleanField(f['PAYS']) || '',
+          secteur: cleanField(f['SECTEUR']) || '',
+          effectif: cleanField(f['Effectif']) || '',
+          resultat: cleanField(f['RESULTAT']) || '',
+          cloud: cleanField(f['Cloud']) || '',
+          commentaire: cleanField(f['COMMENTAIRE']) || '',
+        });
+      }
+
+      offset = data.offset || null;
+      total = allContacts.length;
+
+    } while (offset);
+
+    document.getElementById('load-progress-fill').style.width = '100%';
+    document.getElementById('load-status').textContent = `✅ ${total} contacts chargés`;
+
+    populateFilterOptions();
+    filteredContacts = [...allContacts];
+    applyFilters();
+    updateStats();
+    toast(`${total} contacts chargés depuis Airtable`, 'success');
+
+  } catch(e) {
+    toast('Erreur Airtable : ' + e.message, 'error');
+    document.getElementById('load-status').textContent = '❌ Erreur : ' + e.message;
+    wrap.innerHTML = `<div class="empty-state"><div class="icon">❌</div><p>Erreur : ${e.message}</p></div>`;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '🔄 Recharger les contacts';
+    setTimeout(() => { document.getElementById('load-progress').style.display = 'none'; }, 2000);
+  }
+}
+
+function populateFilterOptions() {
+  const sectors = [...new Set(allContacts.map(c => c.secteur).filter(Boolean))].sort();
+  const effectifs = [...new Set(allContacts.map(c => c.effectif).filter(Boolean))].sort();
+  const resultats = [...new Set(allContacts.map(c => c.resultat).filter(Boolean))].sort();
+
+  fillSelect('f-secteur', sectors, 'Tous les secteurs');
+  fillSelect('f-effectif', effectifs, 'Tous les effectifs');
+  fillSelect('f-resultat', resultats, 'Tous les statuts');
+}
+
+function fillSelect(id, values, placeholder) {
+  const sel = document.getElementById(id);
+  const current = sel.value;
+  sel.innerHTML = `<option value="">${placeholder}</option>`;
+  values.forEach(v => {
+    const opt = document.createElement('option');
+    opt.value = v; opt.textContent = v;
+    if (v === current) opt.selected = true;
+    sel.appendChild(opt);
+  });
+}
+
+// ============================================================
+// FILTERS
+// ============================================================
+function applyFilters() {
+  const fSociete = document.getElementById('f-societe').value.trim().toLowerCase();
+  const fFonction = document.getElementById('f-fonction').value.trim().toLowerCase();
+  const fVille = document.getElementById('f-ville').value.trim().toLowerCase();
+  const fSecteur = document.getElementById('f-secteur').value;
+  const fEffectif = document.getElementById('f-effectif').value;
+  const fResultat = document.getElementById('f-resultat').value;
+  const emailOnly = document.getElementById('f-email-only').checked;
+
+  filteredContacts = allContacts.filter(c => {
+    if (fSociete && !c.societe.toLowerCase().includes(fSociete)) return false;
+    if (fFonction && !c.fonction.toLowerCase().includes(fFonction)) return false;
+    if (fVille && !c.ville.toLowerCase().includes(fVille)) return false;
+    if (fSecteur && c.secteur !== fSecteur) return false;
+    if (fEffectif && c.effectif !== fEffectif) return false;
+    if (fResultat && c.resultat !== fResultat) return false;
+    if (emailOnly && !c.email) return false;
+    return true;
+  });
+
+  renderContactTable();
+  document.getElementById('filtered-count').textContent = filteredContacts.length;
+  updateStats();
+}
+
+function resetFilters() {
+  ['f-societe','f-fonction','f-ville'].forEach(id => document.getElementById(id).value = '');
+  ['f-secteur','f-effectif','f-resultat'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('f-email-only').checked = true;
+  applyFilters();
+}
+
+// ============================================================
+// CONTACT TABLE RENDER
+// ============================================================
+function renderContactTable() {
+  const wrap = document.getElementById('contact-table-wrap');
+
+  if (filteredContacts.length === 0) {
+    wrap.innerHTML = `<div class="empty-state"><div class="icon">🔍</div><p>Aucun contact ne correspond aux filtres</p></div>`;
+    return;
+  }
+
+  const rows = filteredContacts.map(c => {
+    const checked = selectedIds.has(c.id) ? 'checked' : '';
+    const noEmail = !c.email;
+    const emailCell = noEmail
+      ? `<td><span class="badge badge-no-email">Pas d'email</span></td>`
+      : `<td class="td-email">${escHtml(c.email)}</td>`;
+    const name = [c.civilite, c.prenom, c.nom].filter(Boolean).join(' ') || '—';
+    const rowClass = (noEmail ? 'no-email' : '') + (selectedIds.has(c.id) ? ' selected' : '');
+    return `<tr class="${rowClass}" data-id="${c.id}" onclick="toggleRow(event,'${c.id}')">
+      <td><input type="checkbox" ${checked} ${noEmail ? 'disabled' : ''} onclick="toggleRow(event,'${c.id}')"></td>
+      <td title="${escHtml(name)}">${escHtml(name)}</td>
+      <td class="td-societe" title="${escHtml(c.societe)}">${escHtml(c.societe) || '—'}</td>
+      <td title="${escHtml(c.fonction)}">${escHtml(truncate(c.fonction, 30)) || '—'}</td>
+      ${emailCell}
+      <td class="td-ville">${escHtml(c.ville) || '—'}</td>
+    </tr>`;
+  }).join('');
+
+  wrap.innerHTML = `
+    <table>
+      <thead>
+        <tr>
+          <th style="width:32px;"></th>
+          <th>Nom</th>
+          <th>Société</th>
+          <th>Fonction</th>
+          <th>Email</th>
+          <th>Ville</th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+
+  updateSelectedBadge();
+}
+
+function toggleRow(event, id) {
+  // don't double-fire from checkbox click
+  if (event.target.type === 'checkbox') {
+    event.stopPropagation();
+  }
+  const contact = allContacts.find(c => c.id === id);
+  if (!contact || !contact.email) return;
+
+  if (selectedIds.has(id)) {
+    selectedIds.delete(id);
+  } else {
+    selectedIds.add(id);
+  }
+  // update row
+  const row = document.querySelector(`tr[data-id="${id}"]`);
+  if (row) {
+    row.classList.toggle('selected', selectedIds.has(id));
+    const cb = row.querySelector('input[type="checkbox"]');
+    if (cb) cb.checked = selectedIds.has(id);
+  }
+  updateSelectedBadge();
+  updateStats();
+}
+
+function toggleSelectAll(checked) {
+  filteredContacts.forEach(c => {
+    if (c.email) {
+      if (checked) selectedIds.add(c.id);
+      else selectedIds.delete(c.id);
+    }
+  });
+  renderContactTable();
+  document.getElementById('select-all').checked = checked;
+  updateSelectedBadge();
+  updateStats();
+}
+
+function deselectAll() {
+  selectedIds.clear();
+  document.getElementById('select-all').checked = false;
+  renderContactTable();
+  updateSelectedBadge();
+  updateStats();
+}
+
+function updateSelectedBadge() {
+  document.getElementById('selected-badge').textContent = selectedIds.size;
+  document.getElementById('stat-selected').textContent = selectedIds.size;
+}
+
+// ============================================================
+// VARIABLE SUBSTITUTION
+// ============================================================
+function substituteVars(template, contact) {
+  return template
+    .replace(/\{civilite\}/gi, contact.civilite || '')
+    .replace(/\{prenom\}/gi, contact.prenom || '')
+    .replace(/\{nom\}/gi, contact.nom || '')
+    .replace(/\{societe\}/gi, contact.societe || '')
+    .replace(/\{fonction\}/gi, contact.fonction || '')
+    .replace(/\{lien_iclosed\}/gi, ICLOSED_LINK);
+}
+
+function bodyToHtml(text) {
+  // Convert plain text to simple HTML
+  return '<p>' + escHtml(text)
+    .replace(/\n\n/g, '</p><p>')
+    .replace(/\n/g, '<br>') + '</p>';
+}
+
+// ============================================================
+// VARIABLE INSERTION
+// ============================================================
+function insertVar(textareaId, variable) {
+  const ta = document.getElementById(textareaId);
+  if (!ta) return;
+  const start = ta.selectionStart;
+  const end = ta.selectionEnd;
+  const before = ta.value.substring(0, start);
+  const after = ta.value.substring(end);
+  ta.value = before + variable + after;
+  ta.selectionStart = ta.selectionEnd = start + variable.length;
+  ta.focus();
+}
+
+// ============================================================
+// PREVIEW
+// ============================================================
+function previewEmail() {
+  const subject = document.getElementById('campagne-subject').value;
+  const body = document.getElementById('campagne-body').value;
+
+  if (!subject && !body) { toast('Composez d\'abord votre email', 'warning'); return; }
+
+  const sample = [...selectedIds].length > 0
+    ? allContacts.find(c => selectedIds.has(c.id) && c.email)
+    : filteredContacts.find(c => c.email);
+
+  const contact = sample || {
+    civilite: 'Mr', prenom: 'Jean', nom: 'Dupont',
+    societe: 'Acme Corp', fonction: 'Directeur Général',
+    email: 'jean.dupont@acme.com', ville: 'Paris'
+  };
+
+  const renderedSubject = substituteVars(subject, contact);
+  const renderedBody = substituteVars(body, contact);
+
+  document.getElementById('preview-to').textContent = `${contact.civilite} ${contact.prenom} ${contact.nom} <${contact.email}>`;
+  document.getElementById('preview-subject').textContent = renderedSubject;
+  document.getElementById('preview-body').innerHTML = bodyToHtml(renderedBody);
+
+  document.getElementById('previewModal').classList.remove('hidden');
+}
+
+function previewDirectEmail() {
+  const subject = document.getElementById('direct-subject').value;
+  const body = document.getElementById('direct-body').value;
+  const to = document.getElementById('direct-to').value;
+
+  if (!body && !subject) { toast('Composez d\'abord votre email', 'warning'); return; }
+
+  const contact = {
+    civilite: document.getElementById('d-civilite').value || 'Mr',
+    prenom: document.getElementById('d-prenom').value || 'Prénom',
+    nom: document.getElementById('d-nom').value || 'Nom',
+    societe: document.getElementById('d-societe').value || 'Société',
+    fonction: document.getElementById('d-fonction').value || 'Fonction',
+    email: to.split(',')[0].trim() || 'destinataire@email.com',
+  };
+
+  const renderedSubject = substituteVars(subject, contact);
+  const renderedBody = substituteVars(body, contact);
+
+  document.getElementById('preview-to').textContent = contact.email;
+  document.getElementById('preview-subject').textContent = renderedSubject;
+  document.getElementById('preview-body').innerHTML = bodyToHtml(renderedBody);
+
+  document.getElementById('previewModal').classList.remove('hidden');
+}
+
+// ============================================================
+// TEMPLATES
+// ============================================================
+function openTemplateModal() {
+  document.getElementById('template-name-input').value = '';
+  document.getElementById('templateModal').classList.remove('hidden');
+  setTimeout(() => document.getElementById('template-name-input').focus(), 100);
+}
+
+function confirmSaveTemplate() {
+  const name = document.getElementById('template-name-input').value.trim();
+  if (!name) { toast('Entrez un nom pour le template', 'error'); return; }
+
+  const templates = getTemplates();
+  templates[name] = {
+    subject: document.getElementById('campagne-subject').value,
+    body: document.getElementById('campagne-body').value,
+  };
+  saveTemplates(templates);
+  loadTemplateList();
+  document.getElementById('templateModal').classList.add('hidden');
+  toast(`Template "${name}" sauvegardé`, 'success');
+}
+
+function getTemplates() {
+  try { return JSON.parse(localStorage.getItem('tr7_templates') || '{}'); } catch(e) { return {}; }
+}
+
+function saveTemplates(t) {
+  localStorage.setItem('tr7_templates', JSON.stringify(t));
+}
+
+function loadTemplateList() {
+  const sel = document.getElementById('template-select');
+  const templates = getTemplates();
+  const current = sel.value;
+  sel.innerHTML = `<option value="">📂 Charger un template</option>`;
+  Object.keys(templates).forEach(name => {
+    const opt = document.createElement('option');
+    opt.value = name;
+    opt.textContent = name;
+    if (name === current) opt.selected = true;
+    sel.appendChild(opt);
+  });
+}
+
+function loadTemplate(name) {
+  if (!name) return;
+  const templates = getTemplates();
+  const t = templates[name];
+  if (t) {
+    document.getElementById('campagne-subject').value = t.subject || '';
+    document.getElementById('campagne-body').value = t.body || '';
+    toast(`Template "${name}" chargé`, 'info');
+  }
+}
+
+// ============================================================
+// BREVO SEND
+// ============================================================
+async function sendBrevoEmail({ toEmail, toName, subject, htmlContent }) {
+  if (!config.brevoKey) throw new Error('Brevo API key manquante');
+
+  const payload = {
+    sender: { name: config.senderName || 'TR7 Agency Studio', email: SENDER_EMAIL },
+    to: [{ email: toEmail, name: toName || toEmail }],
+    subject: subject,
+    htmlContent: htmlContent,
+  };
+
+  const resp = await fetch(BREVO_ENDPOINT, {
+    method: 'POST',
+    headers: {
+      'api-key': config.brevoKey,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!resp.ok) {
+    let msg = `HTTP ${resp.status}`;
+    try {
+      const err = await resp.json();
+      msg = err.message || msg;
+    } catch(e) {}
+    throw new Error(msg);
+  }
+
+  return true;
+}
+
+// ============================================================
+// SEND CAMPAIGN
+// ============================================================
+async function sendCampaign() {
+  if (!config.brevoKey) { toast('Configurez votre Brevo API key', 'error'); openConfig(); return; }
+
+  const selected = allContacts.filter(c => selectedIds.has(c.id) && c.email);
+  if (selected.length === 0) { toast('Sélectionnez des contacts avec email', 'warning'); return; }
+
+  const subject = document.getElementById('campagne-subject').value.trim();
+  const body = document.getElementById('campagne-body').value.trim();
+  if (!subject) { toast('Entrez un objet d\'email', 'warning'); return; }
+  if (!body) { toast('Entrez le corps de l\'email', 'warning'); return; }
+
+  const remaining = DAILY_LIMIT - sentToday;
+  if (remaining <= 0) { toast('Quota journalier atteint (180 emails)', 'error'); return; }
+
+  const toSend = selected.slice(0, remaining);
+  if (toSend.length < selected.length) {
+    toast(`Quota limité : envoi de ${toSend.length}/${selected.length} emails`, 'warning');
+  }
+
+  // UI
+  const btn = document.getElementById('send-btn');
+  btn.disabled = true;
+  const wrap = document.getElementById('send-progress-wrap');
+  wrap.style.display = 'block';
+  const log = document.getElementById('send-log');
+  log.innerHTML = '';
+
+  let ok = 0, err = 0;
+
+  for (let i = 0; i < toSend.length; i++) {
+    const c = toSend[i];
+    const pct = Math.round(((i + 1) / toSend.length) * 100);
+
+    document.getElementById('send-progress-fill').style.width = pct + '%';
+    document.getElementById('send-pct').textContent = pct + '%';
+    document.getElementById('send-status-text').textContent = `Envoi ${i + 1}/${toSend.length} → ${c.email}`;
+
+    const renderedSubject = substituteVars(subject, c);
+    const renderedBody = substituteVars(body, c);
+    const html = bodyToHtml(renderedBody);
+    const name = [c.civilite, c.prenom, c.nom].filter(Boolean).join(' ');
+
+    try {
+      await sendBrevoEmail({ toEmail: c.email, toName: name, subject: renderedSubject, htmlContent: html });
+      ok++;
+      incrementQuota(1);
+      log.innerHTML += `<div class="log-entry log-ok"><span class="ico">✅</span> ${escHtml(name || c.email)} — envoyé</div>`;
+    } catch(e) {
+      err++;
+      log.innerHTML += `<div class="log-entry log-err"><span class="ico">❌</span> ${escHtml(c.email)} — ${escHtml(e.message)}</div>`;
+    }
+
+    log.scrollTop = log.scrollHeight;
+
+    // Small delay to avoid hammering API
+    if (i < toSend.length - 1) await sleep(200);
+  }
+
+  btn.disabled = false;
+  document.getElementById('send-status-text').textContent = `Terminé : ${ok} envoyés, ${err} erreurs`;
+  toast(`Campagne terminée : ${ok} ✅ / ${err} ❌`, ok > 0 ? 'success' : 'error');
+  updateStats();
+}
+
+// ============================================================
+// SEND DIRECT
+// ============================================================
+async function sendDirectEmail() {
+  if (!config.brevoKey) { toast('Configurez votre Brevo API key', 'error'); openConfig(); return; }
+
+  const toRaw = document.getElementById('direct-to').value.trim();
+  if (!toRaw) { toast('Entrez au moins une adresse email', 'warning'); return; }
+
+  const subject = document.getElementById('direct-subject').value.trim();
+  const body = document.getElementById('direct-body').value.trim();
+  if (!subject) { toast('Entrez un objet d\'email', 'warning'); return; }
+  if (!body) { toast('Entrez le corps de l\'email', 'warning'); return; }
+
+  const emails = toRaw.split(',').map(e => e.trim()).filter(e => e.includes('@'));
+  if (emails.length === 0) { toast('Aucune adresse email valide', 'error'); return; }
+
+  const remaining = DAILY_LIMIT - sentToday;
+  if (remaining <= 0) { toast('Quota journalier atteint (180 emails)', 'error'); return; }
+
+  const toSend = emails.slice(0, remaining);
+
+  const contact = {
+    civilite: document.getElementById('d-civilite').value || '',
+    prenom: document.getElementById('d-prenom').value || '',
+    nom: document.getElementById('d-nom').value || '',
+    societe: document.getElementById('d-societe').value || '',
+    fonction: document.getElementById('d-fonction').value || '',
+    email: '',
+  };
+
+  const wrap = document.getElementById('direct-send-progress');
+  wrap.style.display = 'block';
+  const log = document.getElementById('direct-send-log');
+  log.innerHTML = '';
+
+  let ok = 0, err = 0;
+
+  for (let i = 0; i < toSend.length; i++) {
+    const email = toSend[i];
+    contact.email = email;
+
+    const pct = Math.round(((i + 1) / toSend.length) * 100);
+    document.getElementById('direct-progress-fill').style.width = pct + '%';
+
+    const renderedSubject = substituteVars(subject, contact);
+    const renderedBody = substituteVars(body, contact);
+    const html = bodyToHtml(renderedBody);
+    const name = [contact.civilite, contact.prenom, contact.nom].filter(Boolean).join(' ');
+
+    try {
+      await sendBrevoEmail({ toEmail: email, toName: name || email, subject: renderedSubject, htmlContent: html });
+      ok++;
+      incrementQuota(1);
+      log.innerHTML += `<div class="log-entry log-ok"><span class="ico">✅</span> ${escHtml(email)} — envoyé</div>`;
+    } catch(e) {
+      err++;
+      log.innerHTML += `<div class="log-entry log-err"><span class="ico">❌</span> ${escHtml(email)} — ${escHtml(e.message)}</div>`;
+    }
+
+    log.scrollTop = log.scrollHeight;
+    if (i < toSend.length - 1) await sleep(200);
+  }
+
+  toast(`Email(s) envoyé(s) : ${ok} ✅ / ${err} ❌`, ok > 0 ? 'success' : 'error');
+  updateQuotaDisplay();
+}
+
+// ============================================================
+// UTILS
+// ============================================================
+function escHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function truncate(str, len) {
+  if (!str) return '';
+  return str.length > len ? str.slice(0, len) + '…' : str;
+}
+
+function sleep(ms) {
+  return new Promise(r => setTimeout(r, ms));
+}
+
+// ============================================================
+// TOAST
+// ============================================================
+function toast(msg, type = 'info') {
+  const icons = { success: '✅', error: '❌', warning: '⚠️', info: 'ℹ️' };
+  const container = document.getElementById('toast-container');
+  const div = document.createElement('div');
+  div.className = `toast ${type}`;
+  div.innerHTML = `<span>${icons[type] || 'ℹ️'}</span><span>${escHtml(msg)}</span>`;
+  container.appendChild(div);
+  setTimeout(() => {
+    div.style.transition = 'opacity 0.3s';
+    div.style.opacity = '0';
+    setTimeout(() => div.remove(), 300);
+  }, 3500);
+}
+
+// ============================================================
+// KEYBOARD SHORTCUTS
+// ============================================================
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    document.getElementById('previewModal').classList.add('hidden');
+    document.getElementById('templateModal').classList.add('hidden');
+  }
+});
+
+// Enter key in template name input
+document.getElementById('template-name-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') confirmSaveTemplate();
+});
+
+// ============================================================
+// START
+// ============================================================
+init();
+</script>
+</body>
+</html>
